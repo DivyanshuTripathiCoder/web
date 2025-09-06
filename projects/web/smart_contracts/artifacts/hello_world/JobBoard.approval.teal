@@ -1,0 +1,151 @@
+#pragma version 10
+#pragma typetrack false
+
+// @algorandfoundation/algorand-typescript/arc4/index.d.ts::Contract.approvalProgram() -> uint64:
+main:
+    intcblock 0 1
+    bytecblock "jobTitle" "jobDescription" "" 0x151f7c75
+    txn ApplicationID
+    bnz main_after_if_else@2
+    // smart_contracts/hello_world/contract.algo.ts:5
+    // jobTitle = GlobalState<string>({ key: "jobTitle", initialValue: "" })
+    bytec_0 // "jobTitle"
+    bytec_2 // ""
+    app_global_put
+    // smart_contracts/hello_world/contract.algo.ts:6
+    // jobDescription = GlobalState<string>({ key: "jobDescription", initialValue: "" })
+    bytec_1 // "jobDescription"
+    bytec_2 // ""
+    app_global_put
+
+main_after_if_else@2:
+    // smart_contracts/hello_world/contract.algo.ts:3
+    // export class JobBoard extends Contract {
+    txn NumAppArgs
+    bz main_bare_routing@9
+    pushbytess 0x31604011 0x4b5aaf55 // method "SubmitJob(string,string)string", method "GetJob()string"
+    txna ApplicationArgs 0
+    match main_SubmitJob_route@5 main_GetJob_route@6
+
+main_after_if_else@13:
+    // smart_contracts/hello_world/contract.algo.ts:3
+    // export class JobBoard extends Contract {
+    intc_0 // 0
+    return
+
+main_GetJob_route@6:
+    // smart_contracts/hello_world/contract.algo.ts:16
+    // GetJob(): string {
+    txn OnCompletion
+    !
+    assert // OnCompletion is not NoOp
+    txn ApplicationID
+    assert // can only call when not creating
+    callsub GetJob
+    dup
+    len
+    itob
+    extract 6 2
+    swap
+    concat
+    bytec_3 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_1 // 1
+    return
+
+main_SubmitJob_route@5:
+    // smart_contracts/hello_world/contract.algo.ts:9
+    // SubmitJob(title: string, description: string): string {
+    txn OnCompletion
+    !
+    assert // OnCompletion is not NoOp
+    txn ApplicationID
+    assert // can only call when not creating
+    // smart_contracts/hello_world/contract.algo.ts:3
+    // export class JobBoard extends Contract {
+    txna ApplicationArgs 1
+    extract 2 0
+    txna ApplicationArgs 2
+    extract 2 0
+    // smart_contracts/hello_world/contract.algo.ts:9
+    // SubmitJob(title: string, description: string): string {
+    callsub SubmitJob
+    dup
+    len
+    itob
+    extract 6 2
+    swap
+    concat
+    bytec_3 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_1 // 1
+    return
+
+main_bare_routing@9:
+    // smart_contracts/hello_world/contract.algo.ts:3
+    // export class JobBoard extends Contract {
+    txn OnCompletion
+    bnz main_after_if_else@13
+    txn ApplicationID
+    !
+    assert // can only call when creating
+    intc_1 // 1
+    return
+
+
+// smart_contracts/hello_world/contract.algo.ts::JobBoard.SubmitJob(title: bytes, description: bytes) -> bytes:
+SubmitJob:
+    // smart_contracts/hello_world/contract.algo.ts:9
+    // SubmitJob(title: string, description: string): string {
+    proto 2 1
+    // smart_contracts/hello_world/contract.algo.ts:5
+    // jobTitle = GlobalState<string>({ key: "jobTitle", initialValue: "" })
+    bytec_0 // "jobTitle"
+    // smart_contracts/hello_world/contract.algo.ts:10
+    // this.jobTitle.value = title
+    frame_dig -2
+    app_global_put
+    // smart_contracts/hello_world/contract.algo.ts:6
+    // jobDescription = GlobalState<string>({ key: "jobDescription", initialValue: "" })
+    bytec_1 // "jobDescription"
+    // smart_contracts/hello_world/contract.algo.ts:11
+    // this.jobDescription.value = description
+    frame_dig -1
+    app_global_put
+    // smart_contracts/hello_world/contract.algo.ts:12
+    // return `Job submitted: ${title}`
+    pushbytes "Job submitted: "
+    frame_dig -2
+    concat
+    retsub
+
+
+// smart_contracts/hello_world/contract.algo.ts::JobBoard.GetJob() -> bytes:
+GetJob:
+    // smart_contracts/hello_world/contract.algo.ts:5
+    // jobTitle = GlobalState<string>({ key: "jobTitle", initialValue: "" })
+    intc_0 // 0
+    bytec_0 // "jobTitle"
+    app_global_get_ex
+    assert // check GlobalState exists
+    // smart_contracts/hello_world/contract.algo.ts:17
+    // return `Title: ${this.jobTitle.value}, Description: ${this.jobDescription.value}`
+    pushbytes "Title: "
+    swap
+    concat
+    pushbytes ", Description: "
+    concat
+    // smart_contracts/hello_world/contract.algo.ts:6
+    // jobDescription = GlobalState<string>({ key: "jobDescription", initialValue: "" })
+    intc_0 // 0
+    bytec_1 // "jobDescription"
+    app_global_get_ex
+    assert // check GlobalState exists
+    // smart_contracts/hello_world/contract.algo.ts:17
+    // return `Title: ${this.jobTitle.value}, Description: ${this.jobDescription.value}`
+    concat
+    retsub
